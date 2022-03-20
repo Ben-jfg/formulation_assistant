@@ -54,15 +54,15 @@ def get_select_box_options(df_drug, df_cancer):
     return drug_list, cancer_list
 
 
-def set_confidence(row, confidence_threshold=None):  # 1-3 low , 4-10 medium, >11 high
+def set_confidence(row, confidence_threshold=None):  # 1-3 low , 4-10 medium, >11 high #
     if confidence_threshold is None:
         confidence_threshold = [3, 10]
     if row['# of publications'] <= confidence_threshold[0]:
-        return 'low'
+        return 'Rare'
     elif row['# of publications'] <= confidence_threshold[1]:
-        return 'medium'
+        return 'Medium'
     elif row['# of publications'] > confidence_threshold[1]:
-        return 'high'
+        return 'Common'
     else:
         assert 'bad # of publications'
 
@@ -119,7 +119,7 @@ def get_data_to_save(results_df):
 
 ## Search functions:
 def init_result_dict():
-    return {'Drug I (type 1)': [], 'Drug II': [], 'Drug II type': [], 'Cancer Type': [], 'Confidence Level': []}
+    return {'Drug I (type 1)': [], 'Drug II': [], 'Drug II type': [], 'Cancer Type': [], 'Frequency in Literature': []}
 
 
 def add_to_result_dict(row, result_dict):
@@ -127,7 +127,7 @@ def add_to_result_dict(row, result_dict):
     result_dict['Drug II'].append(row["All drugs"])
     result_dict['Drug II type'].append(row["all_drug_type"])
     result_dict['Cancer Type'].append(row["Cancers"])
-    result_dict['Confidence Level'].append(row["confidence_level"])
+    result_dict['Frequency in Literature'].append(row["confidence_level"])
     return result_dict
 
 

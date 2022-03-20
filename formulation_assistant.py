@@ -47,7 +47,8 @@ with button_con:
 
 with results_con:
     if len(drug_in) > 2:
-        st.markdown('<b><span style="color:#AF1F22">Please select up to tow drugs', unsafe_allow_html=True)
+        st.markdown('<b><span style="color:#AF1F22">Please select up to two drugs', unsafe_allow_html=True)
+        df_results = None
 
     elif len(drug_in) == 2:
         if cancer_in == '':
