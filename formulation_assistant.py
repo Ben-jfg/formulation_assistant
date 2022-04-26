@@ -18,7 +18,8 @@ about_con = st.container()
 df_drug, df_cancer, dict_drug = get_data()
 drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
 with title_con:
-    st.title('Formulation Assistant')
+    # st.title('Nano Meta Synergy')
+    st.image('logo.png')
 
 with text_con:
     st.markdown('**Drug classifaction by Type as function of  nano-particals (NPs) stability**<br /> '
