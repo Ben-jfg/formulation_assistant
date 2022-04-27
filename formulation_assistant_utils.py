@@ -4,10 +4,21 @@ import plotly.graph_objects as go
 
 
 @st.cache
+def get_cancer_abbreviations_dict():
+    return {'GIST': 'Gastrointestinal Stromal Tumor',
+            'HNSCC': 'Head And Neck Cancer',
+            'HCC': 'Hepatocellular Carcinoma',
+            'NSCLC': 'Non-Small Cell Lung Cancer',
+            'SCLC': 'Small Cell Lung Cancer',
+            'OVARIAN CANCER': 'Ovarian Cancer'}
+
+
+@st.cache
 def get_data():
     xls = pd.ExcelFile("Drug Classification and synergy2.0.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)')
+    df_cancer.replace(get_cancer_abbreviations_dict() ,inplace=True)
     dict_drug = {}
     for cur_col in list(df_drug):
         for cur_drug in list(df_drug[cur_col].dropna()):
