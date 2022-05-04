@@ -18,17 +18,22 @@ about_con = st.container()
 df_drug, df_cancer, dict_drug = get_data()
 drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
 with title_con:
-    # st.title('Nano Meta Synergy')
-    st.image('logo.png')
+    # st.title('Nano Meta Synergy Finder')
+    st.image('images\logo3.png')
 
 with text_con:
-    st.markdown('**Drug classifaction by Type as function of  nano-particals (NPs) stability**<br /> '
-                '<b><i><span style="color:#2B78FF">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />'
-                '<b><i><span style="color:#2B78FF">_Type 2_</b></i> - Drugs that form Good but not stable NPs<br />'
-                '<b><i><span style="color:#2B78FF">_Type 3_</b></i>  - Aggregates<br />'
-                '<b><i><span style="color:#2B78FF">_Type 4_</b></i>  - Drugs that failed to precipitate<br />'
+    st.markdown('**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> '
+                '<b><i><span style="color:#345BAF">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />'
+                '<b><i><span style="color:#345BAF">_Type 2_</b></i> - Drugs that formulate "Good" but unstable NPs<br />'
+                '<b><i><span style="color:#345BAF">_Type 3_</b></i>  - Aggregates<br />'
+                '<b><i><span style="color:#345BAF">_Type 4_</b></i>  - Drugs that fail to precipitate<br />'
+                '<b><i><span style="color:#345BAF">_Type 5_</b></i>  - Drugs that fail to formulate NPs<br />'
                 '\u2022 Particles are “Good” if size<150nm, PDI<  0.2,<br />'
-                '\u2022  Particles are stable if they remain “good” after 3 days', unsafe_allow_html=True)
+                '\u2022  Particles are stable if they remain “good” after 3 days,<br />'
+                '**Fluorescence Status (F.S.):**<br />'
+                '\u2022 Fluorescent<br />'
+                '\u2022 AIE - Aggregation-Induced Emission<br />'
+                '\u2022 Non-Active', unsafe_allow_html=True)
 
 with button_con:
     button_col1, button_col2, button_col3 = st.columns(3)
