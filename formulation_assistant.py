@@ -19,7 +19,7 @@ df_drug, df_cancer, dict_drug = get_data()
 drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
 with title_con:
     # st.title('Nano Meta Synergy Finder')
-    st.image('images\logo3.png')
+    st.image('images/logo3.png')
 
 with text_con:
     st.markdown('**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> '
