@@ -267,43 +267,43 @@ def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer):
     return get_result_df(result_dict)
 
 
-# Offline Functions
-def add_fluorescence_status_to_df(df, aie_list, acq_list, non_active_list):
-    aie_list = [x.lower() for x in aie_list]
-    acq_list = [x.lower() for x in acq_list]
-    non_active_list = [x.lower() for x in non_active_list]
-
-    f_s_list = []
-    for i, row in df.iterrows():
-        if row['All drugs'].lower() in aie_list:
-            f_s_list.append('AIE')
-        elif row['All drugs'].lower() in acq_list:
-            f_s_list.append('Fluorescent')
-        elif row['All drugs'].lower() in non_active_list:
-            f_s_list.append('Non-Active')
-        else:
-            f_s_list.append('NA')
-    df['Fluorescence Status'] = f_s_list
-    # df.to_csv(
-    # 'C:\\Users\\benf\\OneDrive - NVIDIA Corporation\\Desktop\\Uni_stuff\\Technion\\Yosi_lab\\08-apps\\082-formulation_assistant\\fs.csv')
-    return df
-
-
-def clean_merged_df(merge_df, verbose=False, save_path=None):
-    merge_df.replace(get_cancer_abbreviations_dict(), inplace=True)
-    merge_df['Cancers'] = merge_df['Cancers'].str.lower()
-    merge_df['TypeI'] = merge_df['TypeI'].str.lower()
-    merge_df['All drugs'] = merge_df['All drugs'].str.lower()
-
-    merge_df = merge_df.sort_values(by=['# of publications'], ascending=False, ignore_index=True)
-
-    if verbose:
-        print(f'{merge_df.nunique()=}, {merge_df["# of publications"].sum()=}')
-
-    merge_df_no_dup = merge_df.drop_duplicates()
-    if verbose:
-        print(f'{merge_df_no_dup.nunique()=}, {merge_df_no_dup["# of publications"].sum()=}')
-
-    if save_path:
-        merge_df_no_dup.to_csv(save_path)
-    return merge_df_no_dup
+# # Offline Functions
+# def add_fluorescence_status_to_df(df, aie_list, acq_list, non_active_list):
+#     aie_list = [x.lower() for x in aie_list]
+#     acq_list = [x.lower() for x in acq_list]
+#     non_active_list = [x.lower() for x in non_active_list]
+#
+#     f_s_list = []
+#     for i, row in df.iterrows():
+#         if row['All drugs'].lower() in aie_list:
+#             f_s_list.append('AIE')
+#         elif row['All drugs'].lower() in acq_list:
+#             f_s_list.append('Fluorescent')
+#         elif row['All drugs'].lower() in non_active_list:
+#             f_s_list.append('Non-Active')
+#         else:
+#             f_s_list.append('NA')
+#     df['Fluorescence Status'] = f_s_list
+#     # df.to_csv(
+#     # 'C:\\Users\\benf\\OneDrive - NVIDIA Corporation\\Desktop\\Uni_stuff\\Technion\\Yosi_lab\\08-apps\\082-formulation_assistant\\fs.csv')
+#     return df
+#
+#
+# def clean_merged_df(merge_df, verbose=False, save_path=None):
+#     merge_df.replace(get_cancer_abbreviations_dict(), inplace=True)
+#     merge_df['Cancers'] = merge_df['Cancers'].str.lower()
+#     merge_df['TypeI'] = merge_df['TypeI'].str.lower()
+#     merge_df['All drugs'] = merge_df['All drugs'].str.lower()
+#
+#     merge_df = merge_df.sort_values(by=['# of publications'], ascending=False, ignore_index=True)
+#
+#     if verbose:
+#         print(f'{merge_df.nunique()=}, {merge_df["# of publications"].sum()=}')
+#
+#     merge_df_no_dup = merge_df.drop_duplicates()
+#     if verbose:
+#         print(f'{merge_df_no_dup.nunique()=}, {merge_df_no_dup["# of publications"].sum()=}')
+#
+#     if save_path:
+#         merge_df_no_dup.to_csv(save_path)
+#     return merge_df_no_dup
