@@ -20,20 +20,21 @@ drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
 with title_con:
     # st.title('Nano Meta Synergy Finder')
     st.image('images/logo3.png')
+    # t_col1, t_col2, t_col3 = st.columns([4,1,1])
+    st.video('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
 with text_con:
-    st.markdown('**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> '
-                '<b><i><span style="color:#345BAF">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />'
-                '<b><i><span style="color:#345BAF">_Type 2_</b></i> - Drugs that formulate "Good" but unstable NPs<br />'
-                '<b><i><span style="color:#345BAF">_Type 3_</b></i>  - Aggregates<br />'
-                '<b><i><span style="color:#345BAF">_Type 4_</b></i>  - Drugs that fail to precipitate<br />'
-                '<b><i><span style="color:#345BAF">_Type 5_</b></i>  - Drugs that fail to formulate NPs<br />'
-                '\u2022 Particles are “Good” if size<150nm, PDI<  0.2,<br />'
-                '\u2022  Particles are stable if they remain “good” after 3 days,<br />'
-                '**Fluorescence Status (F.S.):**<br />'
-                '\u2022 Fluorescent<br />'
-                '\u2022 AIE - Aggregation-Induced Emission<br />'
-                '\u2022 Non-Active', unsafe_allow_html=True)
+    st.markdown("**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> "
+                "<b><i><span style=\"color:#345BAF\">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />"
+                "<b><i><span style=\"color:#345BAF\">_Type 2_</b></i> - Drugs that formulate \"Good\" but unstable NPs<br />"
+                "<b><i><span style=\"color:#345BAF\">_Type 3_</b></i>  - Drugs which aggregates into large structures <br />"
+                "<b><i><span style=\"color:#345BAF\">_Type 4_</b></i>  - Drugs that do not to precipitate alone but can co-precipitate with Type 1 drugs<br />"
+                "<b><i><span style=\"color:#345BAF\">_Type 5_</b></i>  - Drugs that do not precipitate alone nor co-precipitate with Type 1 drugs<br />"
+                "\u2022 Particles are “Good” if size<150nm, PDI<  0.2,<br />"
+                "\u2022  Particles are stable if they remain “good” after 3 days,<br />"
+                "**Fluorescence Status:**<br />"
+                "\u2022 Fluorescent<br />"
+                "\u2022 AIE - Aggregation-Induced Emission<br />", unsafe_allow_html=True)
 
 with button_con:
     button_col1, button_col2, button_col3 = st.columns(3)

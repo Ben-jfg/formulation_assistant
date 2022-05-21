@@ -13,17 +13,26 @@ def get_cancer_abbreviations_dict():
             'GBM': 'Glioblastoma',
             'AML': 'Acute Myeloid Leukemia',
             'MCL': 'Mantle Cell Lymphoma',
-            'TNBC': 'Triple-Negative Breast Cancer',
+            'TNBC': 'Breast Cancer',
             'CML': 'Chronic Myelogenous Leukemia',
+            '17Aag': '17-AAG',
+            'DLBCL': 'Diffuse Large B-Cell Lymphoma',
+            'um': 'Uveal Melanoma',
+            'crc': 'Colon Cancer',
+            'colorectal cancer': 'Colon Cancer',
+            'dipg': 'Diffuse Intrinsic Pontine Glioma',
             'OVARIAN CANCER': 'Ovarian Cancer'}
 
 
 @st.cache
 def get_data():
-    xls = pd.ExcelFile("Drug Classification and synergy3.0.xlsx")
+    xls = pd.ExcelFile("Drug Classification and synergy4.0.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)', keep_default_na=False)
     df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
+    # df_cancer["Fluorescence Status"].replace({'NA': 'Non-Active'}, inplace=True)
+    df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
+
     dict_drug = {}
     for cur_col in list(df_drug):
         for cur_drug in list(df_drug[cur_col].dropna()):
@@ -122,27 +131,39 @@ def get_empty_df_result_str(drugs, dict_drug, no_results_str):
     return no_results_str
 
 
+cols_to_show = ['Drug A', 'Drug B', 'Cancer Type', 'Drugs Type', 'Stable NP', 'Frequency in Literature']
+
+
 def plot_result_df(results_df, results_filed, drugs, dict_drug):
     if results_df is None:
         results_filed.markdown('_The results will appear here..._')
         return
+    map_color = {"Yes": "#C6F2C9", "No": "#F2D9D5", "Unknown": "#F0F2F6"}
+    results_df['Stable NP color'] = results_df['Stable NP'].map(map_color)
+    fill_color = []
+    n = len(results_df)
+    for col in cols_to_show:
+        if col != 'Stable NP':
+            fill_color.append(['#F0F2F6'] * n)
+        else:
+            fill_color.append(results_df["Stable NP color"].to_list())
 
     no_results_str = get_type_5_result_str(drugs, dict_drug)
 
     if results_df.empty:
         no_results_str = get_empty_df_result_str(drugs, dict_drug, no_results_str)
-    #D7DEEF
+    # D7DEEF
     if not results_df.empty:
         fig = go.Figure(data=go.Table(
-            header=dict(values=get_bold_headers(results_df),
+            header=dict(values=get_bold_headers(results_df[cols_to_show]),
                         fill_color='#B3BDD8',
-                        font=dict(size=16),
+                        font=dict(size=15),
                         align='center'),
-            cells=dict(values=results_df.transpose().values.tolist(),
-                       fill_color='#F0F2F6',
-                       font=dict(size=12),
-                       align='left')))
-        fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=135 * len(list(results_df)), height=1000)
+            cells=dict(values=results_df[cols_to_show].transpose().values.tolist(),
+                       fill_color=fill_color,
+                       font=dict(size=14),
+                       align=['left', 'left', 'left', 'left', 'center', 'left'])))
+        fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=120 * len(list(results_df[cols_to_show])), height=1000)
         no_results_str += f'**{len(results_df)} results were found**'
         results_filed.markdown(f'{no_results_str}', unsafe_allow_html=True)
         results_filed.write(fig)
@@ -156,19 +177,38 @@ def get_data_to_save(results_df):
     if results_df is None or results_df.empty:
         return temp.to_csv(index=False).encode('utf-8')
     else:
-        return results_df.to_csv(index=False).encode('utf-8')
+        return results_df[cols_to_show].to_csv(index=False).encode('utf-8')
 
 
 ## Search functions:
 def init_result_dict():
-    return {'Drug A (Type 1)': [], 'Drug B': [], 'Drug B Info': [], 'Cancer Type': [], 'Frequency in Literature': []}
+    return {'Drug A': [], 'Drug B': [], 'Cancer Type': [], 'Drugs Type': [], 'Stable NP': [],
+            'Frequency in Literature': []}
+
+
+def get_stable_np_status(row):
+    if row["all_drug_type"] == 'Type NA':
+        return 'Unknown'
+    elif row["all_drug_type"] == 'Type 5':
+        return f'No'
+    else:
+        return f'Yes'
 
 
 def add_to_result_dict(row, result_dict):
-    result_dict['Drug A (Type 1)'].append(f'{row["TypeI"]} <br> F.S. {row["Fluorescence Status"]}')
-    result_dict['Drug B'].append(row["All drugs"])
-    result_dict['Drug B Info'].append(f'{row["all_drug_type"]} <br> F.S. {row["Fluorescence Status"]}')
+    if row["TypeI"] == row["All drugs"]:
+        return result_dict
+    if (row["TypeI"] in result_dict['Drug B']) and (row["All drugs"] in result_dict['Drug A']) and (row["Cancers"] in result_dict['Cancer Type']):
+        return result_dict
+
+    result_dict['Drug A'].append(f'{row["TypeI"]}')
+    fs = ''
+    if row["Fluorescence Status"] != 'NA':
+        fs = f' <br><b>{row["Fluorescence Status"]}'
+    result_dict['Drug B'].append(row["All drugs"] + fs)
     result_dict['Cancer Type'].append(row["Cancers"])
+    result_dict['Drugs Type'].append(f'Drug A: Type 1 <br>Drug B: {row["all_drug_type"]}')
+    result_dict['Stable NP'].append(get_stable_np_status(row))
     result_dict['Frequency in Literature'].append(row["confidence_level"])
     return result_dict
 
@@ -177,7 +217,7 @@ def get_result_df(result_dict):
     result_df = pd.DataFrame.from_dict(result_dict)
     # st.write(result_df)
     # st.write(result_dict)
-    result_df = result_df.sort_values(by=['Drug A (Type 1)', 'Drug B', 'Cancer Type'])
+    result_df = result_df.sort_values(by=['Drug A', 'Drug B', 'Cancer Type'])
     return result_df
 
 
@@ -245,5 +285,25 @@ def add_fluorescence_status_to_df(df, aie_list, acq_list, non_active_list):
             f_s_list.append('NA')
     df['Fluorescence Status'] = f_s_list
     # df.to_csv(
-        # 'C:\\Users\\benf\\OneDrive - NVIDIA Corporation\\Desktop\\Uni_stuff\\Technion\\Yosi_lab\\08-apps\\082-formulation_assistant\\fs.csv')
+    # 'C:\\Users\\benf\\OneDrive - NVIDIA Corporation\\Desktop\\Uni_stuff\\Technion\\Yosi_lab\\08-apps\\082-formulation_assistant\\fs.csv')
     return df
+
+
+def clean_merged_df(merge_df, verbose=False, save_path=None):
+    merge_df.replace(get_cancer_abbreviations_dict(), inplace=True)
+    merge_df['Cancers'] = merge_df['Cancers'].str.lower()
+    merge_df['TypeI'] = merge_df['TypeI'].str.lower()
+    merge_df['All drugs'] = merge_df['All drugs'].str.lower()
+
+    merge_df = merge_df.sort_values(by=['# of publications'], ascending=False, ignore_index=True)
+
+    if verbose:
+        print(f'{merge_df.nunique()=}, {merge_df["# of publications"].sum()=}')
+
+    merge_df_no_dup = merge_df.drop_duplicates()
+    if verbose:
+        print(f'{merge_df_no_dup.nunique()=}, {merge_df_no_dup["# of publications"].sum()=}')
+
+    if save_path:
+        merge_df_no_dup.to_csv(save_path)
+    return merge_df_no_dup
