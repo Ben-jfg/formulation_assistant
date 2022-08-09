@@ -20,8 +20,10 @@ drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
 with title_con:
     # st.title('Nano Meta Synergy Finder')
     st.image('images/logo3.png')
+    st.markdown('<b><i><span style=\"color:#345BAF\">Paper Link placeholder', unsafe_allow_html=True)
     # t_col1, t_col2, t_col3 = st.columns([4,1,1])
-    st.video('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    st.video('https://www.youtube.com/watch?v=VscCpyPnI3A&ab_channel=YosiShamayLab')
+
 
 with text_con:
     st.markdown("**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> "
@@ -30,8 +32,9 @@ with text_con:
                 "<b><i><span style=\"color:#345BAF\">_Type 3_</b></i>  - Drugs which aggregates into large structures <br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 4_</b></i>  - Drugs that do not to precipitate alone but can co-precipitate with Type 1 drugs<br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 5_</b></i>  - Drugs that do not precipitate alone nor co-precipitate with Type 1 drugs<br />"
-                "\u2022 Particles are “Good” if size<150nm, PDI<  0.2,<br />"
-                "\u2022  Particles are stable if they remain “good” after 3 days,<br />"
+                "\u2022 Particles are “Good” if size<150nm, PDI<  0.2<br />"
+                "\u2022  Particles are stable if they remain “good” after 3 days<br />"
+                "\u2022  'Pred. Type x' is the predicted type according to our model, as reviewed in the paper<br />"
                 "**Fluorescence Status:**<br />"
                 "\u2022 Fluorescent<br />"
                 "\u2022 AIE - Aggregation-Induced Emission<br />", unsafe_allow_html=True)
@@ -46,7 +49,10 @@ with button_con:
 
     help_button = button_col3.button('Help')
     if help_button:
-        st.markdown('_Help is on the way..._')
+        st.markdown('<b>NanoMetaSynergy Finder (NMSF) </b> is a search engine for anti-cancer drug combinations that can formulate ‘good’ and ‘stable’ and nanoparticles (see definition above) with synergy to specific cancer types.<br>'
+                    '<br>To do so, simply choose up to two drugs from the list at the “Select Drugs” box, a single cancer type at the “Select Cancer Type” box, or any combination of them.<br>'
+                    '<br>NMSF will scan its database, finding relevant combination and providing information on the anti-cancer drugs, their <b>Type</b> (see definition above), synergy to cancer types, indication if the two drugs can formulate ‘good’ and ‘stable’ and nanoparticles, a "frequency in literature” rating for each combination and even a direct link to PubMed search results.<br>'
+                    '<br><br>We hope NMSF can help you in your research!<br>For support, please contact us at: b.f@campus.technion.ac.il<br><b>Enjoy!</b>', unsafe_allow_html=True)
 
     with inputs_con:
         drug_in = st.multiselect('Select Drugs (optional, up to 2)', drug_list, key='drug_in')

@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
+import numpy as np
 
 
 @st.cache
@@ -26,13 +27,13 @@ def get_cancer_abbreviations_dict():
 
 @st.cache
 def get_data():
-    xls = pd.ExcelFile("Drug Classification and synergy4.0.xlsx")
+    xls = pd.ExcelFile("Drug Classification and synergy9.0.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)', keep_default_na=False)
-    df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
-    # df_cancer["Fluorescence Status"].replace({'NA': 'Non-Active'}, inplace=True)
-    df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
-
+    # df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
+    # # df_cancer["Fluorescence Status"].replace({'NA': 'Non-Active'}, inplace=True)
+    # df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
+    #
     dict_drug = {}
     for cur_col in list(df_drug):
         for cur_drug in list(df_drug[cur_col].dropna()):
@@ -40,26 +41,26 @@ def get_data():
                 dict_drug[cur_drug] = cur_col
             else:
                 dict_drug[cur_drug.title()] = cur_col
-    pd.options.mode.chained_assignment = None
-    all_drug_type = []
-    confidence_list = []
-    for index, row in df_cancer.iterrows():
-        if not row['Cancers'].isupper():
-            df_cancer['Cancers'][index] = row['Cancers'].title()
-        if not row['TypeI'].isupper():
-            df_cancer['TypeI'][index] = row['TypeI'].title()
-        if not row['All drugs'].isupper():
-            df_cancer['All drugs'][index] = row['All drugs'].title()
-
-        if df_cancer['All drugs'][index] in list(dict_drug.keys()):
-            all_drug_type.append(dict_drug[df_cancer['All drugs'][index]])
-        else:
-            all_drug_type.append('Type NA')
-
-        confidence_list.append(set_confidence(row))
-
-    df_cancer['all_drug_type'] = all_drug_type
-    df_cancer['confidence_level'] = confidence_list
+    # pd.options.mode.chained_assignment = None
+    # all_drug_type = []
+    # confidence_list = []
+    # for index, row in df_cancer.iterrows():
+    #     if not row['Cancers'].isupper():
+    #         df_cancer['Cancers'][index] = row['Cancers'].title()
+    #     if not row['TypeI'].isupper():
+    #         df_cancer['TypeI'][index] = row['TypeI'].title()
+    #     if not row['All drugs'].isupper():
+    #         df_cancer['All drugs'][index] = row['All drugs'].title()
+    #
+    #     if df_cancer['All drugs'][index] in list(dict_drug.keys()):
+    #         all_drug_type.append(dict_drug[df_cancer['All drugs'][index]])
+    #     else:
+    #         all_drug_type.append('Type NA')
+    #
+    #     confidence_list.append(set_confidence(row))
+    #
+    # df_cancer['all_drug_type'] = all_drug_type
+    # df_cancer['confidence_level'] = confidence_list
     return df_drug, df_cancer, dict_drug
 
 
@@ -131,13 +132,27 @@ def get_empty_df_result_str(drugs, dict_drug, no_results_str):
     return no_results_str
 
 
-cols_to_show = ['Drug A', 'Drug B', 'Cancer Type', 'Drugs Type', 'Stable NP', 'Frequency in Literature']
+cols_to_show = ['Drug A', 'Drug B', 'Cancer Type', 'Drugs Type', 'Stable NP', 'Frequency in Literature', 'PubMed']
+
+
+def get_pubmed_links(results_df):
+    pubmed_links_list = []
+    for index, row in results_df.iterrows():
+        pubmed_links_list.append({"Link": f"https://pubmed.ncbi.nlm.nih.gov/?term=%28%28"
+                                           f"{row['Drug A'].replace(' ','+')}%29+AND+%28"
+                                           f"{row['Drug B'].split(' <br>')[0].replace(' ','+')}%29%29+AND+%28"
+                                           f"{row['Cancer Type'].replace(' ','+')}%29&sort="})
+    results_df['PubMed'] = pubmed_links_list
+    results_df['PubMed'] = results_df['PubMed'].apply(
+        lambda x: f'<a href="{list(x.values())[0]}">{list(x.keys())[0]}</a>')
 
 
 def plot_result_df(results_df, results_filed, drugs, dict_drug):
     if results_df is None:
         results_filed.markdown('_The results will appear here..._')
         return
+
+    get_pubmed_links(results_df)
     map_color = {"Yes": "#C6F2C9", "No": "#F2D9D5", "Unknown": "#F0F2F6"}
     results_df['Stable NP color'] = results_df['Stable NP'].map(map_color)
     fill_color = []
@@ -154,7 +169,7 @@ def plot_result_df(results_df, results_filed, drugs, dict_drug):
         no_results_str = get_empty_df_result_str(drugs, dict_drug, no_results_str)
     # D7DEEF
     if not results_df.empty:
-        fig = go.Figure(data=go.Table(
+        fig = go.Figure(data=go.Table(columnwidth = [110,110,130,125,90,120,75],
             header=dict(values=get_bold_headers(results_df[cols_to_show]),
                         fill_color='#B3BDD8',
                         font=dict(size=15),
@@ -162,8 +177,10 @@ def plot_result_df(results_df, results_filed, drugs, dict_drug):
             cells=dict(values=results_df[cols_to_show].transpose().values.tolist(),
                        fill_color=fill_color,
                        font=dict(size=14),
-                       align=['left', 'left', 'left', 'left', 'center', 'left'])))
-        fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=120 * len(list(results_df[cols_to_show])), height=1000)
+                       align=['left', 'left', 'left', 'left', 'center', 'center','left'])))
+        # fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=120 * len(list(results_df[cols_to_show])), height=1000)
+        fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+
         no_results_str += f'**{len(results_df)} results were found**'
         results_filed.markdown(f'{no_results_str}', unsafe_allow_html=True)
         results_filed.write(fig)
@@ -189,7 +206,7 @@ def init_result_dict():
 def get_stable_np_status(row):
     if row["all_drug_type"] == 'Type NA':
         return 'Unknown'
-    elif row["all_drug_type"] == 'Type 5':
+    elif row["all_drug_type"] == 'Type 5' or row["all_drug_type"] == 'Pred. Type 5' :
         return f'No'
     else:
         return f'Yes'
@@ -207,7 +224,7 @@ def add_to_result_dict(row, result_dict):
         fs = f' <br><b>{row["Fluorescence Status"]}'
     result_dict['Drug B'].append(row["All drugs"] + fs)
     result_dict['Cancer Type'].append(row["Cancers"])
-    result_dict['Drugs Type'].append(f'Drug A: Type 1 <br>Drug B: {row["all_drug_type"]}')
+    result_dict['Drugs Type'].append(f'A:<b> Type 1</b> <br>B: <b>{row["all_drug_type"]}</b>')
     result_dict['Stable NP'].append(get_stable_np_status(row))
     result_dict['Frequency in Literature'].append(row["confidence_level"])
     return result_dict
@@ -307,3 +324,22 @@ def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer):
 #     if save_path:
 #         merge_df_no_dup.to_csv(save_path)
 #     return merge_df_no_dup
+#
+#
+# for DrugBank
+# def get_predicted_type(mol):
+#
+#     if mol['experimental_logP'] and mol['experimental_logP'] < 2.5:
+#         if mol['aromatic_rings'] > 1:
+#             return 'Type 4'
+#         else:
+#             return 'Type 5'
+#     else:
+#         if mol['NHISS'] >= 4 and (mol['pKa_strongest_acidic'] > 7 and mol['pKa_strongest_basic'] > 7):
+#             if mol['Fluorescence Status'] == 'AIE':
+#                 return 'Type 1'
+#             else:
+#                 return 'Type 2'
+#         else:
+#             return 'Type 3'
+
