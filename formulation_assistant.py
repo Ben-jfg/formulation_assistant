@@ -29,12 +29,12 @@ with text_con:
     st.markdown("**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> "
                 "<b><i><span style=\"color:#345BAF\">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 2_</b></i> - Drugs that formulate \"Good\" but unstable NPs<br />"
-                "<b><i><span style=\"color:#345BAF\">_Type 3_</b></i>  - Drugs which aggregates into large structures <br />"
+                "<b><i><span style=\"color:#345BAF\">_Type 3_</b></i>  - Drugs which aggregate into large structures <br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 4_</b></i>  - Drugs that do not to precipitate alone but can co-precipitate with Type 1 drugs<br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 5_</b></i>  - Drugs that do not precipitate alone nor co-precipitate with Type 1 drugs<br />"
-                "\u2022 Particles are “Good” if size<150nm, PDI<  0.2<br />"
-                "\u2022  Particles are stable if they remain “good” after 3 days<br />"
-                "\u2022  'Pred. Type x' is the predicted type according to our model, as reviewed in the paper<br />"
+                "\u2022 Particles are considered “Good” if they are of size < 150nm and have PDI < 0.2<br />"
+                "\u2022 Particles are considered stable if they remain “Good” after 3 days<br />"
+                "\u2022 'Pred. Type x' is the predicted type according to our model, as reviewed in the paper<br />"
                 "**Fluorescence Status:**<br />"
                 "\u2022 Fluorescent<br />"
                 "\u2022 AIE - Aggregation-Induced Emission<br />", unsafe_allow_html=True)
@@ -94,4 +94,4 @@ with button_con:
     )
 
 with about_con:
-    st.markdown('\xA9 Shamay\'s Lab')
+    st.write("[\xA9 Shamay\'s Lab](https://www.shamaylab.com/research-1)")

@@ -172,11 +172,11 @@ def plot_result_df(results_df, results_filed, drugs, dict_drug):
         fig = go.Figure(data=go.Table(columnwidth = [110,110,130,125,90,120,75],
             header=dict(values=get_bold_headers(results_df[cols_to_show]),
                         fill_color='#B3BDD8',
-                        font=dict(size=15),
+                        font=dict(size=15, color='black'),
                         align='center'),
             cells=dict(values=results_df[cols_to_show].transpose().values.tolist(),
                        fill_color=fill_color,
-                       font=dict(size=14),
+                       font=dict(size=14, color='black'),
                        align=['left', 'left', 'left', 'left', 'center', 'center','left'])))
         # fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=120 * len(list(results_df[cols_to_show])), height=1000)
         fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
