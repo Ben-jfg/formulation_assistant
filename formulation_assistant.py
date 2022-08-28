@@ -26,7 +26,7 @@ with title_con:
 
 
 with text_con:
-    st.markdown("**Drug classification by Type as function of  nano-particles (NPs) stability**<br /> "
+    st.markdown("**Drug classification by Type as a function of  nano-particles (NPs) stability**<br /> "
                 "<b><i><span style=\"color:#345BAF\">_Type 1_</b></i> - Drugs that formulate “Good” and stable NPs<br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 2_</b></i> - Drugs that formulate \"Good\" but unstable NPs<br />"
                 "<b><i><span style=\"color:#345BAF\">_Type 3_</b></i>  - Drugs which aggregate into large structures <br />"
