@@ -16,7 +16,7 @@ about_con = st.container()
 #     st.markdown(f'<style>{f.read()}<style>', unsafe_allow_html=True)
 
 df_drug, df_cancer, dict_drug = get_data()
-drug_list, cancer_list = get_select_box_options(df_drug, df_cancer)
+drug_list, cancer_list = get_select_box_options(dict_drug, df_cancer)
 with title_con:
     # st.title('Nano Meta Synergy Finder')
     st.image('images/logo3.png')
@@ -65,21 +65,21 @@ with results_con:
 
     elif len(drug_in) == 2:
         if cancer_in == '':
-            df_results = search_by_two_drugs(drug_in, df_cancer)
+            df_results = search_by_two_drugs(drug_in, df_cancer, dict_drug)
         else:
-            df_results = search_by_two_drugs_and_cancer(drug_in, cancer_in, df_cancer)
+            df_results = search_by_two_drugs_and_cancer(drug_in, cancer_in, df_cancer, dict_drug)
 
     elif len(drug_in) == 1:
         if cancer_in == '':
-            df_results = search_by_single_drug(drug_in[0], df_cancer)
+            df_results = search_by_single_drug(drug_in[0], df_cancer, dict_drug)
         else:
-            df_results = search_by_single_drug_and_cancer(drug_in[0], cancer_in, df_cancer)
+            df_results = search_by_single_drug_and_cancer(drug_in[0], cancer_in, df_cancer, dict_drug)
 
     elif len(drug_in) == 0:
         if cancer_in == '':
             df_results = None
         else:
-            df_results = search_by_cancer(cancer_in, df_cancer)
+            df_results = search_by_cancer(cancer_in, df_cancer, dict_drug)
 
     plot_result_df(df_results, results_con, drug_in, dict_drug)
 

@@ -27,20 +27,34 @@ def get_cancer_abbreviations_dict():
 
 @st.cache
 def get_data():
-    xls = pd.ExcelFile("Drug Classification and synergy9.0.xlsx")
+    xls = pd.ExcelFile("Drug Classification and synergy10.1.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)', keep_default_na=False)
     # df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
     # # df_cancer["Fluorescence Status"].replace({'NA': 'Non-Active'}, inplace=True)
-    # df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
-    #
+    df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
+
+    types_list = ['Type 1','Type 2','Type 3','Type 4','Type 5',
+                  'Pred. Type 1','Pred. Type 2','Pred. Type 3','Pred. Type 4','Pred. Type 5' ]
     dict_drug = {}
-    for cur_col in list(df_drug):
-        for cur_drug in list(df_drug[cur_col].dropna()):
-            if cur_drug.isupper():
-                dict_drug[cur_drug] = cur_col
-            else:
-                dict_drug[cur_drug.title()] = cur_col
+    for cur_type in types_list:
+        pred_type_index = df_cancer.index[df_cancer['all_drug_type'] == cur_type].tolist()
+        cur_drug_list = list(set(df_cancer.loc[pred_type_index]['All drugs']))
+        if not cur_type.startswith('Pred. '):
+            cur_drug_list = cur_drug_list + list(df_drug[cur_type].dropna())
+        elif cur_type == 'Pred. Type 1':
+            cur_drug_list = cur_drug_list + list(set(list(df_cancer['TypeI'])).difference(set(df_drug['Type 1'])))
+        cur_drug_list = list(set(cur_drug_list))
+        dict_drug.update(dict(zip(cur_drug_list, [cur_type]*len(cur_drug_list))))
+    # st.write(dict_drug)
+
+    # dict_drug = {}
+    # for cur_col in list(df_drug):
+    #     for cur_drug in list(df_drug[cur_col].dropna()):
+    #         if cur_drug.isupper():
+    #             dict_drug[cur_drug] = cur_col
+    #         else:
+    #             dict_drug[cur_drug.title()] = cur_col
     # pd.options.mode.chained_assignment = None
     # all_drug_type = []
     # confidence_list = []
@@ -65,12 +79,12 @@ def get_data():
 
 
 @st.cache
-def get_select_box_options(df_drug, df_cancer):
-    drug_list = []
-    for cur_type in list(df_drug):
-        drug_list = drug_list + df_drug[cur_type].dropna().to_list()
-    drug_list = list(set(drug_list))
-    # drug_list.append('')
+def get_select_box_options(dict_drug, df_cancer):
+    # drug_list = []
+    # for cur_type in list(df_drug):
+    #     drug_list = drug_list + df_drug[cur_type].dropna().to_list()
+    # drug_list = list(set(drug_list))
+    drug_list = list(dict_drug.keys())
     drug_list.sort(reverse=False)
 
     cancer_list = list(set(df_cancer['Cancers'].to_list()))
@@ -132,7 +146,7 @@ def get_empty_df_result_str(drugs, dict_drug, no_results_str):
     return no_results_str
 
 
-cols_to_show = ['Drug A', 'Drug B', 'Cancer Type', 'Drugs Type', 'Stable NP', 'Frequency in Literature', 'PubMed']
+cols_to_show = ['Drug A', 'Drug B', 'Cancer Type', 'Drugs Type', 'Stable NP', 'Freq. in Literature', 'PubMed']
 
 
 def get_pubmed_links(results_df):
@@ -169,7 +183,7 @@ def plot_result_df(results_df, results_filed, drugs, dict_drug):
         no_results_str = get_empty_df_result_str(drugs, dict_drug, no_results_str)
     # D7DEEF
     if not results_df.empty:
-        fig = go.Figure(data=go.Table(columnwidth = [110,110,130,125,90,120,75],
+        fig = go.Figure(data=go.Table(columnwidth = [141,141,149,114,67,80,68],
             header=dict(values=get_bold_headers(results_df[cols_to_show]),
                         fill_color='#B3BDD8',
                         font=dict(size=15, color='black'),
@@ -200,7 +214,7 @@ def get_data_to_save(results_df):
 ## Search functions:
 def init_result_dict():
     return {'Drug A': [], 'Drug B': [], 'Cancer Type': [], 'Drugs Type': [], 'Stable NP': [],
-            'Frequency in Literature': []}
+            'Freq. in Literature': []}
 
 
 def get_stable_np_status(row):
@@ -212,7 +226,7 @@ def get_stable_np_status(row):
         return f'Yes'
 
 
-def add_to_result_dict(row, result_dict):
+def add_to_result_dict(row, result_dict, dict_drug):
     if row["TypeI"] == row["All drugs"]:
         return result_dict
     if (row["TypeI"] in result_dict['Drug B']) and (row["All drugs"] in result_dict['Drug A']) and (row["Cancers"] in result_dict['Cancer Type']):
@@ -224,9 +238,9 @@ def add_to_result_dict(row, result_dict):
         fs = f' <br><b>{row["Fluorescence Status"]}'
     result_dict['Drug B'].append(row["All drugs"] + fs)
     result_dict['Cancer Type'].append(row["Cancers"])
-    result_dict['Drugs Type'].append(f'A:<b> Type 1</b> <br>B: <b>{row["all_drug_type"]}</b>')
+    result_dict['Drugs Type'].append(f'A:<b> {dict_drug[row["TypeI"]]}</b> <br>B: <b>{row["all_drug_type"]}</b>')
     result_dict['Stable NP'].append(get_stable_np_status(row))
-    result_dict['Frequency in Literature'].append(row["confidence_level"])
+    result_dict['Freq. in Literature'].append(row["confidence_level"])
     return result_dict
 
 
@@ -238,49 +252,49 @@ def get_result_df(result_dict):
     return result_df
 
 
-def search_by_cancer(cancer, df_cancer):
+def search_by_cancer(cancer, df_cancer, dict_drug):
     result_dict = init_result_dict()
     for index, row in df_cancer.iterrows():
         if row['Cancers'] == cancer:
-            result_dict = add_to_result_dict(row, result_dict)
+            result_dict = add_to_result_dict(row, result_dict, dict_drug)
 
     return get_result_df(result_dict)
 
 
-def search_by_single_drug(drug, df_cancer):
+def search_by_single_drug(drug, df_cancer, dict_drug):
     result_dict = init_result_dict()
     for index, row in df_cancer.iterrows():
         if row["TypeI"] == drug or row["All drugs"] == drug:
             if row["TypeI"] == row["All drugs"]:
                 continue
-            result_dict = add_to_result_dict(row, result_dict)
+            result_dict = add_to_result_dict(row, result_dict, dict_drug)
     return get_result_df(result_dict)
 
 
-def search_by_two_drugs(drugs, df_cancer):
+def search_by_two_drugs(drugs, df_cancer, dict_drug):
     result_dict = init_result_dict()
     for index, row in df_cancer.iterrows():
         if (row["TypeI"] == drugs[0] and row["All drugs"] == drugs[1]) or (
                 row["TypeI"] == drugs[1] and row["All drugs"] == drugs[0]):
-            result_dict = add_to_result_dict(row, result_dict)
+            result_dict = add_to_result_dict(row, result_dict, dict_drug)
     return get_result_df(result_dict)
 
 
-def search_by_single_drug_and_cancer(drug, cancer, df_cancer):
+def search_by_single_drug_and_cancer(drug, cancer, df_cancer, dict_drug):
     result_dict = init_result_dict()
     for index, row in df_cancer.iterrows():
         if (row["TypeI"] == drug or row["All drugs"] == drug) and (row['Cancers'] == cancer):
-            result_dict = add_to_result_dict(row, result_dict)
+            result_dict = add_to_result_dict(row, result_dict, dict_drug)
     return get_result_df(result_dict)
 
 
-def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer):
+def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer, dict_drug):
     result_dict = init_result_dict()
     for index, row in df_cancer.iterrows():
         if (row["TypeI"] == drugs[0] and row["All drugs"] == drugs[1]) or (
                 row["TypeI"] == drugs[1] and row["All drugs"] == drugs[0]):
             if row['Cancers'] == cancer:
-                result_dict = add_to_result_dict(row, result_dict)
+                result_dict = add_to_result_dict(row, result_dict, dict_drug)
     return get_result_df(result_dict)
 
 
