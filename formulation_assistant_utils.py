@@ -5,13 +5,6 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import QED
 from rdkit.Chem import Fragments
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
-from rdkit.Chem import rdmolops
-from rdkit.Chem import rdDepictor
-from rdkit.Chem import rdMolDescriptors
-from rdkit.Chem.Draw import SimilarityMaps
-
 
 @st.cache
 def get_cancer_abbreviations_dict():
