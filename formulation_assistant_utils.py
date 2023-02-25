@@ -2,6 +2,15 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+from rdkit import Chem
+from rdkit.Chem import QED
+from rdkit.Chem import Fragments
+from rdkit.Chem import Draw
+from rdkit.Chem import AllChem
+from rdkit.Chem import rdmolops
+from rdkit.Chem import rdDepictor
+from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem.Draw import SimilarityMaps
 
 
 @st.cache
@@ -27,15 +36,15 @@ def get_cancer_abbreviations_dict():
 
 @st.cache
 def get_data():
-    xls = pd.ExcelFile("Drug Classification and synergy10.1.xlsx")
+    xls = pd.ExcelFile("Drug Classification and synergy10.2.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)', keep_default_na=False)
     # df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
     # # df_cancer["Fluorescence Status"].replace({'NA': 'Non-Active'}, inplace=True)
     df_cancer["Fluorescence Status"].replace({'Non-Active': 'NA'}, inplace=True)
 
-    types_list = ['Type 1','Type 2','Type 3','Type 4','Type 5',
-                  'Pred. Type 1','Pred. Type 2','Pred. Type 3','Pred. Type 4','Pred. Type 5' ]
+    types_list = ['Type 1', 'Type 2', 'Type 3', 'Type 4', 'Type 5',
+                  'Pred. Type 1', 'Pred. Type 2', 'Pred. Type 3', 'Pred. Type 4', 'Pred. Type 5']
     dict_drug = {}
     for cur_type in types_list:
         pred_type_index = df_cancer.index[df_cancer['all_drug_type'] == cur_type].tolist()
@@ -45,7 +54,7 @@ def get_data():
         elif cur_type == 'Pred. Type 1':
             cur_drug_list = cur_drug_list + list(set(list(df_cancer['TypeI'])).difference(set(df_drug['Type 1'])))
         cur_drug_list = list(set(cur_drug_list))
-        dict_drug.update(dict(zip(cur_drug_list, [cur_type]*len(cur_drug_list))))
+        dict_drug.update(dict(zip(cur_drug_list, [cur_type] * len(cur_drug_list))))
     # st.write(dict_drug)
 
     # dict_drug = {}
@@ -153,9 +162,9 @@ def get_pubmed_links(results_df):
     pubmed_links_list = []
     for index, row in results_df.iterrows():
         pubmed_links_list.append({"Link": f"https://pubmed.ncbi.nlm.nih.gov/?term=%28%28"
-                                           f"{row['Drug A'].replace(' ','+')}%29+AND+%28"
-                                           f"{row['Drug B'].split(' <br>')[0].replace(' ','+')}%29%29+AND+%28"
-                                           f"{row['Cancer Type'].replace(' ','+')}%29&sort="})
+                                          f"{row['Drug A'].replace(' ', '+')}%29+AND+%28"
+                                          f"{row['Drug B'].split(' <br>')[0].replace(' ', '+')}%29%29+AND+%28"
+                                          f"{row['Cancer Type'].replace(' ', '+')}%29&sort="})
     results_df['PubMed'] = pubmed_links_list
     results_df['PubMed'] = results_df['PubMed'].apply(
         lambda x: f'<a href="{list(x.values())[0]}">{list(x.keys())[0]}</a>')
@@ -183,15 +192,15 @@ def plot_result_df(results_df, results_filed, drugs, dict_drug):
         no_results_str = get_empty_df_result_str(drugs, dict_drug, no_results_str)
     # D7DEEF
     if not results_df.empty:
-        fig = go.Figure(data=go.Table(columnwidth = [141,141,149,114,67,80,68],
-            header=dict(values=get_bold_headers(results_df[cols_to_show]),
-                        fill_color='#B3BDD8',
-                        font=dict(size=15, color='black'),
-                        align='center'),
-            cells=dict(values=results_df[cols_to_show].transpose().values.tolist(),
-                       fill_color=fill_color,
-                       font=dict(size=14, color='black'),
-                       align=['left', 'left', 'left', 'left', 'center', 'center','left'])))
+        fig = go.Figure(data=go.Table(columnwidth=[141, 141, 149, 114, 67, 80, 68],
+                                      header=dict(values=get_bold_headers(results_df[cols_to_show]),
+                                                  fill_color='#B3BDD8',
+                                                  font=dict(size=14, color='black'),
+                                                  align='left'),
+                                      cells=dict(values=results_df[cols_to_show].transpose().values.tolist(),
+                                                 fill_color=fill_color,
+                                                 font=dict(size=12, color='black'),
+                                                 align=['left', 'left', 'left', 'left', 'center', 'center', 'left'])))
         # fig.update_layout(margin=dict(l=0, r=0, b=0, t=0), width=120 * len(list(results_df[cols_to_show])), height=1000)
         fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
 
@@ -220,7 +229,7 @@ def init_result_dict():
 def get_stable_np_status(row):
     if row["all_drug_type"] == 'Type NA':
         return 'Unknown'
-    elif row["all_drug_type"] == 'Type 5' or row["all_drug_type"] == 'Pred. Type 5' :
+    elif row["all_drug_type"] == 'Type 5' or row["all_drug_type"] == 'Pred. Type 5':
         return f'No'
     else:
         return f'Yes'
@@ -229,7 +238,8 @@ def get_stable_np_status(row):
 def add_to_result_dict(row, result_dict, dict_drug):
     if row["TypeI"] == row["All drugs"]:
         return result_dict
-    if (row["TypeI"] in result_dict['Drug B']) and (row["All drugs"] in result_dict['Drug A']) and (row["Cancers"] in result_dict['Cancer Type']):
+    if (row["TypeI"] in result_dict['Drug B']) and (row["All drugs"] in result_dict['Drug A']) and (
+            row["Cancers"] in result_dict['Cancer Type']):
         return result_dict
 
     result_dict['Drug A'].append(f'{row["TypeI"]}')
@@ -298,6 +308,90 @@ def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer, dict_drug):
     return get_result_df(result_dict)
 
 
+def clear_models_inputs():
+    st.session_state.in_smiles = ''
+    st.session_state.water_solubility = 0.0
+    st.session_state.pKa_strongest_acidic = 0.0
+    st.session_state.pKa_strongest_basic = 0.0
+    st.session_state.logp = 0.0
+    st.session_state.physiological_charge = int(0)
+
+
+def get_model_data_and_run():
+    mol_dict = {}
+    smiles_str = st.session_state.in_smiles
+    mol = Chem.MolFromSmiles(smiles_str)
+    if smiles_str == '':
+        st.markdown(
+            f'<b><span style="color:#AF1F22"> SMILES code must be defined.', unsafe_allow_html=True)
+        return
+    elif smiles_str.count('Pt') > 0:
+        drug_type = 'Type 5'
+    elif mol:
+        mol_dict['predicted_water_solubility'] = st.session_state.water_solubility
+        mol_dict['pKa_strongest_acidic'] = st.session_state.pKa_strongest_acidic
+        mol_dict['pKa_strongest_basic'] = st.session_state.pKa_strongest_basic
+        mol_dict['CX_logP'] = st.session_state.logp
+        mol_dict['physiological_charge'] = st.session_state.physiological_charge
+        qed_params = list(Chem.QED.properties(mol))
+        mol_dict['MW'] = qed_params[0]
+        mol_dict['HBA'] = qed_params[2]
+        mol_dict['nSulfonamide'] = Fragments.fr_sulfonamd(mol)
+        mol_dict['nF'] = smiles_str.count('F') - smiles_str.count('Fe')
+        mol_dict['nO='] = smiles_str.count('=O') + smiles_str.count('O=')
+        mol_dict['nPt'] = smiles_str.count('Pt')
+        drug_type = run_drug_type_prediction_model(mol_dict)
+    else:
+        drug_type = None
+
+    if drug_type:
+        st.markdown(f'<b><span style="color:Green"> Model Prediction: {drug_type}', unsafe_allow_html=True)
+    else:
+        st.markdown(
+            f'<b><span style="color:#AF1F22"> SMILES code could not be converted to molecule. Please make sure your input is valid.',
+            unsafe_allow_html=True)
+
+
+def run_drug_type_prediction_model(mol):
+    if mol['nPt'] > 0:
+        return 'Type 5'
+
+    if mol['MW'] > 530 or mol['predicted_water_solubility'] < 0.005:
+        if mol['nO='] > 0 and mol['physiological_charge'] == 0:
+            return 'Type 1'
+        else:
+            if mol['nO='] == 0 and mol['pKa_strongest_basic'] < 0:
+                return 'Type 3'
+            elif mol['physiological_charge'] < 0:
+                return 'Type 4'
+            elif mol['nF'] > 2:
+                return 'Type 2'
+            else:
+                return 'Type 3'
+
+    elif mol['nSulfonamide'] > 0:
+        if mol['CX_logP'] < 4:
+            return 'Type 3'
+        else:
+            return 'Type 2'
+
+    elif mol['physiological_charge'] > 0:
+        return 'Type 3'
+    elif mol['physiological_charge'] < 0:
+        return 'Type 5'
+    elif mol['predicted_water_solubility'] > 1:
+        return 'Type 5'
+    elif mol['pKa_strongest_acidic'] > 13.5:
+        return 'Type 3'
+    elif mol['CX_logP'] < 2:
+        return 'Type 4'
+    elif mol['HBA'] > 4:
+        return 'Type 3'
+    elif mol['pKa_strongest_basic'] > -2.5:
+        return 'Type 4'
+    else:
+        return 'Type 5'
+
 # # Offline Functions
 # def add_fluorescence_status_to_df(df, aie_list, acq_list, non_active_list):
 #     aie_list = [x.lower() for x in aie_list]
@@ -356,4 +450,3 @@ def search_by_two_drugs_and_cancer(drugs, cancer, df_cancer, dict_drug):
 #                 return 'Type 2'
 #         else:
 #             return 'Type 3'
-
