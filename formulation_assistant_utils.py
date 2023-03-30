@@ -29,7 +29,7 @@ def get_cancer_abbreviations_dict():
 
 @st.cache
 def get_data():
-    xls = pd.ExcelFile("Drug Classification and synergy10.2.xlsx")
+    xls = pd.ExcelFile("Drug Classification and synergy10.3.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
     df_cancer = pd.read_excel(xls, 'Synergy(biology)', keep_default_na=False)
     # df_cancer.replace(get_cancer_abbreviations_dict(), inplace=True)
