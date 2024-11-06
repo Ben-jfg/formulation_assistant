@@ -6,7 +6,7 @@ from rdkit import Chem
 from rdkit.Chem import QED
 from rdkit.Chem import Fragments
 
-@st.cache
+@st.cache_data
 def get_cancer_abbreviations_dict():
     return {'GIST': 'Gastrointestinal Stromal Tumor',
             'HNSCC': 'Head And Neck Cancer',
@@ -27,7 +27,7 @@ def get_cancer_abbreviations_dict():
             'OVARIAN CANCER': 'Ovarian Cancer'}
 
 
-@st.cache
+@st.cache_data
 def get_data():
     xls = pd.ExcelFile("Drug Classification and synergy10.3.xlsx")
     df_drug = pd.read_excel(xls, 'Types(chemistry)')
@@ -80,7 +80,7 @@ def get_data():
     return df_drug, df_cancer, dict_drug
 
 
-@st.cache
+@st.cache_data
 def get_select_box_options(dict_drug, df_cancer):
     # drug_list = []
     # for cur_type in list(df_drug):
