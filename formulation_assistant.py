@@ -20,7 +20,10 @@ tab_dashboard, tab_model = st.tabs(['Dashboard', 'Prediction Model'])
 with title_con:
     # st.title('Nano Meta Synergy Finder')
     st.image('images/logo3.png')
-    st.markdown('<b><i><span style=\"color:#345BAF\">Paper Link placeholder', unsafe_allow_html=True)
+    st.markdown("[Dana Meron Azagury, Ben Friedmann Gluck, Yuval Harris, Yulia Avrutin, Danna Niezni, Hagit Sason, Yosi Shamay, <br /> \
+               **Prediction of cancer nanomedicines self-assembled from meta-synergistic drug pairs**,<br /> \
+               Journal of Controlled Release, <br /> \
+               Volume 360, 2023, Pages 418-432,](https://www.sciencedirect.com/science/article/pii/S0168365923004236?via%3Dihub)", unsafe_allow_html=True)
     # t_col1, t_col2, t_col3 = st.columns([4,1,1])
     st.video('https://www.youtube.com/watch?v=VscCpyPnI3A&ab_channel=YosiShamayLab')
 
